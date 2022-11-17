@@ -1,0 +1,17 @@
+<mat-card>
+  <mat-card-content>Simple card</mat-card-content>
+  <app-single-select-search
+    [options]="liste"
+    [filter]="true"
+    [showClear]="true"
+    [(value)]="valeur"
+  ></app-single-select-search>
+  <p>{{ valeur }}</p>
+  <app-single-select-search-wngx
+    [options]="liste"
+    [filter]="true"
+    [showClear]="true"
+    [(value)]="valeur2"
+  ></app-single-select-search-wngx>
+  <p>{{ valeur2 }}</p>
+</mat-card>

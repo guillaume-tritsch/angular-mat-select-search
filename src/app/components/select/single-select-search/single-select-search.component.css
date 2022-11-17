@@ -1,0 +1,7 @@
+::ng-deep .mat-select-arrow {
+  opacity: 0;
+}
+
+.separate-icon {
+  margin: 0px 7px 0px 7px;
+}

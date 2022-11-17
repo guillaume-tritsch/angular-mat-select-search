@@ -1,0 +1,59 @@
+<mat-form-field style="margin-top: -1em">
+  <mat-select
+    [disabled]="disabled"
+    [formControl]="valueCtrl"
+    (selectionChange)="emitValueChange()"
+    (openedChange)="loadOptions()"
+    #singleSelect
+    disableOptionCentering
+    panelClass="myPanelClass"
+  >
+    <mat-option
+      disabled
+      style="position: sticky; z-index: 1; top: 0; background-color: white; border-bottom: lightgrey 1px solid"
+    >
+      <input
+        (keyup)="onKey($event)"
+        (keydown)="$event.stopPropagation()"
+        [placeholder]="placeholderLabel"
+        class="input"
+      />
+    </mat-option>
+    <mat-option
+      *ngFor="let element of filteredValue | async"
+      [value]="element[optionValue]"
+    >
+      {{ element[optionLabel] }}
+      <!--<aw-icon-trash-can class="h-4 w-4 text-red" mat-icon-button matSuffix style="float: right"></aw-icon-trash-can>-->
+    </mat-option>
+
+    <mat-option *ngIf="resetOption">{{ resetLabel }}</mat-option>
+
+    <mat-option *ngIf="options.length === 0">{{ resetLabel }}</mat-option>
+  </mat-select>
+
+  <mat-icon
+    class="h-4 w-4 separate-icon"
+    mat-icon-button
+    matSuffix
+    (click)="deleteContent($event)"
+    aria-hidden="true"
+    [ngStyle]="{
+      opacity:
+        [null, undefined].includes(this.valueCtrl.value) &&
+        !disabled &&
+        showClear
+          ? '0'
+          : '1'
+    }"
+    >clear</mat-icon
+  >
+
+  <mat-icon
+    class="h-4 w-4 separate-icon"
+    mat-icon-button
+    matSuffix
+    aria-hidden="true"
+    >keyboard_arrow_down</mat-icon
+  >
+</mat-form-field>
