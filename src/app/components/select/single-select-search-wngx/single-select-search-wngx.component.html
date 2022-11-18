@@ -1,35 +1,39 @@
 <mat-form-field style="margin-top: -1em">
   <mat-select
     [disabled]="disabled"
-    [formControl]="valueCtrl"
     (selectionChange)="emitValueChange()"
     (openedChange)="loadOptions()"
     #singleSelect
     disableOptionCentering
     panelClass="myPanelClass"
+    [placeholder]="placeholderSelect"
+    [(ngModel)]="ngModel"
   >
-    <mat-option
-      disabled
-      style="position: sticky; z-index: 1; top: 0; background-color: white; border-bottom: lightgrey 1px solid"
-    >
+    <!-- Barre de recherche -->
+    <mat-option disabled class="dropdown-input-option" *ngIf="filter">
       <input
-        (keyup)="onKey($event)"
+        #dropdownInput
+        (keyup)="onKey()"
         (keydown)="$event.stopPropagation()"
-        [placeholder]="placeholderLabel"
-        class="input"
+        [placeholder]="placeholderDropdownInput"
+        class="dropdown-input"
+        [(ngModel)]="dropdownInputContent"
       />
     </mat-option>
+
+    <!-- Options -->
     <mat-option
-      *ngFor="let element of filteredValue | async"
+      *ngFor="let element of filteredValue"
       [value]="element[optionValue]"
+      [disabled]="element[optionDisabled]"
     >
       {{ element[optionLabel] }}
-      <!--<aw-icon-trash-can class="h-4 w-4 text-red" mat-icon-button matSuffix style="float: right"></aw-icon-trash-can>-->
     </mat-option>
 
-    <mat-option *ngIf="resetOption">{{ resetLabel }}</mat-option>
-
-    <mat-option *ngIf="options.length === 0">{{ resetLabel }}</mat-option>
+    <!-- Option lorsque pas d'option -->
+    <mat-option *ngIf="filteredValue.length === 0" disabled>{{
+      noOptionLabel
+    }}</mat-option>
   </mat-select>
 
   <mat-icon
@@ -38,13 +42,8 @@
     matSuffix
     (click)="deleteContent($event)"
     aria-hidden="true"
-    [ngStyle]="{
-      opacity:
-        [null, undefined].includes(this.valueCtrl.value) &&
-        !disabled &&
-        showClear
-          ? '0'
-          : '1'
+    [ngClass]="{
+      'hide-icon': [null, undefined].includes(this.ngModel) || disabled
     }"
     >clear</mat-icon
   >

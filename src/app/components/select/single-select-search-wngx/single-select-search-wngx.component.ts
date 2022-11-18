@@ -5,19 +5,16 @@ import {
   Input,
   Output,
   EventEmitter,
-  AfterViewInit,
-  OnDestroy,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-single-select-search-wngx',
   templateUrl: './single-select-search-wngx.component.html',
   styleUrls: ['./single-select-search-wngx.component.scss'],
 })
-export class SingleSelectSearchWngxComponent implements OnInit, OnDestroy {
+export class SingleSelectSearchWngxComponent implements OnInit {
   // A faire
   /*
   - gerer le workflow
@@ -29,100 +26,83 @@ export class SingleSelectSearchWngxComponent implements OnInit, OnDestroy {
   // ===== PARAMETRES =====
 
   // Nom de la variable label
-  @Input() optionLabel = 'label';
+  @Input() optionLabel: string = 'label';
 
   // Nom de la variable value
-  @Input() optionValue = 'value';
+  @Input() optionValue: string = 'value';
+
+  // Nom de la variable value
+  @Input() optionDisabled: string = 'disabled';
 
   // Vrai si une option 'none' est proposé
   @Input() resetOption: boolean = false;
-
-  // Vrai si l'icon de suppression est présent
-  @Input() showClear: boolean = false;
 
   // Vrai si la selection est désactivé
   @Input() disabled: boolean = false;
 
   // Vrai si barre de recherche presente
-  @Input() filter: boolean = false;
+  @Input() filter: boolean = true;
 
   // Label de la selection
-  @Input() placeholder: string = ''; // =================== MARCHE PAS
+  @Input() placeholderSelect: string; // =================== MARCHE PAS
 
   // Label dans la barre de recherche
-  @Input() placeholderLabel: string = 'Search...';
-
-  // Label lorsque aucune option correspond à la recherche
-  @Input() noEntriesFoundLabel: string = 'no matching option found';
+  @Input() placeholderDropdownInput: string = 'Search...';
 
   // Liste des options proposé
-  @Input() options: { value; label }[];
+  @Input() options: { label: string; value; disabled?: boolean }[];
 
   // Label de l'option 'none'
   @Input() resetLabel: string = 'None';
 
+  // Label lorsque aucune option disponible
+  @Input() noOptionLabel: string = 'No option found';
+
   // Suite
 
-  /** control for the selected bank */
-  public valueCtrl: FormControl = new FormControl();
+  public dropdownInputContent: string;
 
-  /** list of banks filtered by search keyword */
-  public filteredValue: ReplaySubject<{ value; label }[]> = new ReplaySubject<
-    { value; label }[]
-  >(1);
+  /** list of options filtered by search keyword */
+  public filteredValue: { label: string; value; disabled?: boolean }[];
 
   @ViewChild('singleSelect') singleSelect!: MatSelect;
+  @ViewChild('dropdownInput') dropdownInput!: ElementRef<HTMLInputElement>;
 
-  @Input() value: Object; // TODO : ici quand recherche pays -> afga toujours selectionné; les options chargent pas au premier clique
-  @Output() valueChange: EventEmitter<Object> = new EventEmitter<Object>();
-
-  protected _onDestroy = new Subject<void>();
+  @Input() ngModel: string; // TODO : ici quand recherche pays -> afga toujours selectionné; les options chargent pas au premier clique
+  @Output() ngModelChange: EventEmitter<string> = new EventEmitter<string>();
 
   constructor() {}
 
   ngOnInit() {
-    this.valueCtrl.setValue(this.value);
-    // load the initial bank list
-
-    this.filteredValue.next(this.options.slice());
-  }
-
-  ngOnDestroy() {
-    this._onDestroy.next();
-    this._onDestroy.complete();
+    this.filteredValue = this.options.slice();
   }
 
   loadOptions() {
-    this.filteredValue.next(this.options.slice());
+    this.filteredValue = this.options.slice();
+    this.dropdownInput.nativeElement.focus();
+    this.dropdownInputContent = null;
   }
 
   deleteContent(event: Event) {
-    if (
-      ![null, undefined].includes(this.valueCtrl.value) &&
-      this.showClear &&
-      !this.disabled
-    ) {
+    if (![null, undefined].includes(this.ngModel) && !this.disabled) {
       event.stopPropagation();
-      this.valueCtrl.setValue(undefined);
+      this.ngModel = null;
       this.emitValueChange();
     }
   }
 
   emitValueChange() {
-    console.log(this.valueCtrl.value);
-    this.valueChange.emit(this.valueCtrl.value);
+    this.ngModelChange.emit(this.ngModel);
   }
 
-  onKey(event) {
-    this.filteredValue.next(
-      this.search((event.target as HTMLInputElement).value)
-    );
+  onKey() {
+    this.filteredValue = this.search(this.dropdownInputContent);
   }
 
-  search(value: string) {
+  search(value: string): { label: string; value; disabled?: boolean }[] {
     let filter = value.toLowerCase();
     return this.options.filter((option) =>
-      option.label.toLowerCase().includes(filter)
+      option[this.optionLabel].toLowerCase().includes(filter)
     );
   }
 }
